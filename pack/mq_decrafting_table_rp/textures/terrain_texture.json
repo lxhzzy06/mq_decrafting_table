@@ -1,0 +1,17 @@
+{
+	"resource_pack_name": "mq_decrafting_table_rp",
+	"texture_name": "atlas.terrain",
+	"padding": 8,
+	"num_mip_levels": 4,
+	"texture_data": {
+		"decrafting_table_front": {
+			"textures": "textures/blocks/decrafting_table_front"
+		},
+		"decrafting_table_side": {
+			"textures": "textures/blocks/decrafting_table_side"
+		},
+		"decrafting_table_top": {
+			"textures": "textures/blocks/decrafting_table_top"
+		}
+	}
+}

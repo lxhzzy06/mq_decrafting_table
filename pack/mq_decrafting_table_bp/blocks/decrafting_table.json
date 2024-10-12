@@ -1,0 +1,21 @@
+{
+	"format_version": "1.21.20",
+	"minecraft:block": {
+		"description": {
+			"identifier": "mq_decrafting_table:table",
+			"menu_category": {
+				"category": "items"
+			}
+		},
+		"components": {
+			"minecraft:crafting_table": { "crafting_tags": ["mq_decrafting_table"] },
+			"minecraft:destructible_by_mining": {
+				"seconds_to_destroy": 1
+			},
+			"minecraft:destructible_by_explosion": {
+				"explosion_resistance": 3
+			},
+			"minecraft:map_color": "#8B4513"
+		}
+	}
+}

@@ -1,0 +1,14 @@
+{
+	"format_version": "1.21.20",
+	"mq_decrafting_table:table": {
+		"textures": {
+            "up": "decrafting_table_top",
+            "down": "crafting_table_bottom",
+            "north": "decrafting_table_front",
+            "south": "decrafting_table_front",
+            "east": "decrafting_table_side",
+            "west": "decrafting_table_side"
+        },
+		"sound": "stone"
+	}
+}

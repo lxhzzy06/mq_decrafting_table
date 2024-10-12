@@ -1,0 +1,24 @@
+{
+	"format_version": 2,
+	"header": {
+		"name": "pack.name",
+		"description": "pack.description",
+		"min_engine_version": [1, 21, 20],
+		"uuid": "57133ec7-a62c-46f9-b391-5bdcde4ad417",
+		"version": [1, 0, 0]
+	},
+	"modules": [
+		{
+			"type": "resources",
+			"uuid": "a35fc608-1b91-4fc8-aa85-e90a21185fe2",
+			"version": [1, 0, 0]
+		}
+	],
+	"metadata": {
+		"authors": ["lxhzzy", "emoの3B"],
+		"license": "MIT",
+		"product_type": "addon",
+		"url": "https://github.com/lxhzzy06/mq_decrafting_table"
+	}
+}
+

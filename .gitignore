@@ -1,0 +1,8 @@
+target/
+node_modules/
+pack/mq_decrafting_table_bp/items/decrafting/*.json
+pack/mq_decrafting_table_bp/recipes/decrafting/*.json
+pack/mq_decrafting_table_bp/loot_tables/decrafting/*.json
+bedrock-samples/
+bedrock-samples.zip
+mq_decrating_table-rs/target/

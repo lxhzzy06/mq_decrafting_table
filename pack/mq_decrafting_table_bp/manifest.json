@@ -1,0 +1,33 @@
+{
+	"format_version": 2,
+	"header": {
+		"name": "pack.name",
+		"description": "pack.description",
+		"uuid": "b200fcb0-1af8-460d-aa70-dc1b9e361158",
+		"version": [1, 0, 0],
+		"min_engine_version": [1, 21, 20]
+	},
+	"modules": [
+		{
+			"description": "script_modules",
+			"type": "script",
+			"language": "javascript",
+			"uuid": "d8a8c768-0343-48df-8f07-d1770d2317e0",
+			"version": [1, 0, 0],
+			"entry": "main.js"
+		}
+	],
+	"dependencies": [
+		{
+			"module_name": "@minecraft/server",
+			"version": "1.12.0"
+		}
+	],
+	"metadata": {
+		"authors": ["lxhzzy", "emoの3B"],
+		"license": "MIT",
+		"product_type": "addon",
+		"url": "https://github.com/lxhzzy06/mq_decrafting_table"
+	}
+}
+
