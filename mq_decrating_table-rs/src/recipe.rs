@@ -93,6 +93,7 @@ pub struct ItemTag<'a> {
 pub enum Ingredient<'a> {
     #[serde(borrow)]
     Item(ItemStack<'a>),
+    #[serde(borrow)]
     Tag(ItemTag<'a>),
 }
 
@@ -174,6 +175,7 @@ pub struct Shaped<'a> {
     pub pattern: Vec<Cow<'a, str>>,
     #[serde(borrow)]
     pub key: FxHashMap<char, Key<'a>>,
+    #[serde(borrow)]
     pub result: ItemStacks<'a>,
 }
 

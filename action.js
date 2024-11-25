@@ -84,11 +84,14 @@ octokit.rest.repos
 							const { key, key_id } = (await octokit.rest.actions.getRepoPublicKey({ owner: 'lxhzzy06', repo: 'mq_decrafting_table' })).data;
 
 							const secretValue = (
-								await http.postJson('https://open-api.123pan.com/api/v1/access_token', {
-									client_id: process.env.CLIENT_ID,
-									client_secret: process.env.CLIENT_SECRET,
-									headers: { platform: 'open_platform' }
-								})
+								await http.postJson(
+									'https://open-api.123pan.com/api/v1/access_token',
+									{
+										client_id: process.env.CLIENT_ID,
+										client_secret: process.env.CLIENT_SECRET
+									},
+									{ platform: 'open_platform' }
+								)
 							).result.data.accessToken;
 							core.setSecret(secretValue);
 
