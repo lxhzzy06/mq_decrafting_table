@@ -15,7 +15,8 @@
 			"minecraft:destructible_by_explosion": {
 				"explosion_resistance": 3
 			},
-			"minecraft:map_color": "#8B4513"
+			"minecraft:map_color": "#8B4513",
+			"minecraft:display_name": "tile.mq_decrafting_table:table.name"
 		}
 	}
 }
