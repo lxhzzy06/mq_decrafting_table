@@ -43,7 +43,7 @@ octokit.rest.repos
       const writer = createWriteStream("./bedrock-samples.zip", { encoding: "binary" });
 
       const http = new HttpClient();
-      writer.write(await (await http.get(latest_release.zipball_url)).readBodyBuffer());
+      writer.write(await (await http.get(latest_release.zipball_url, { "User-Agent": "Awesome - Octocat - App" })).readBodyBuffer());
       writer.end();
 
       writer.on("close", async () => {
