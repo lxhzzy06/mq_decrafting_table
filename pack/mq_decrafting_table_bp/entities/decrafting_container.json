@@ -1,0 +1,133 @@
+{
+	"format_version": "1.26.1",
+	"minecraft:entity": {
+		"description": {
+			"identifier": "mqdt:decrafting_container",
+			"is_spawnable": false,
+			"is_summonable": true,
+			"is_experimental": false
+		},
+		"component_groups": {
+			"mqdt:box_normal": {
+				"minecraft:collision_box": {
+					"width": 1.0,
+					"height": 1.0
+				},
+				"minecraft:scale": {
+					"value": 1.0
+				},
+				"minecraft:entity_sensor": {
+					"relative_range": false,
+					"subsensors": [
+						{
+							"range": [5.0, 5.0],
+							"event_filters": {
+								"all_of": [
+									{
+										"test": "is_family",
+										"subject": "other",
+										"value": "player"
+									},
+									{
+										"test": "is_sneaking",
+										"subject": "other",
+										"value": true
+									}
+								]
+							},
+							"event": "mqdt:shrunk_box",
+							"minimum_count": 1
+						}
+					]
+				}
+			},
+			"mqdt:box_shrunk": {
+				"minecraft:collision_box": {
+					"width": 0.01,
+					"height": 0.01
+				},
+				"minecraft:scale": {
+					"value": 0.01
+				},
+				"minecraft:entity_sensor": {
+					"relative_range": false,
+					"subsensors": [
+						{
+							"range": [5.0, 5.0],
+							"event_filters": {
+								"all_of": [
+									{
+										"test": "is_family",
+										"subject": "other",
+										"value": "player"
+									},
+									{
+										"test": "is_sneaking",
+										"subject": "other",
+										"value": true
+									}
+								]
+							},
+							"event": "mqdt:normal_box",
+							"minimum_count": 0,
+							"maximum_count": 0
+						}
+					]
+				}
+			}
+		},
+		"components": {
+			"minecraft:type_family": {
+				"family": ["mob", "mqdt:decrafting_container"]
+			},
+			"minecraft:physics": {
+				"has_gravity": false,
+				"has_collision": false
+			},
+			"minecraft:health": {
+				"value": 1,
+				"max": 1
+			},
+			"minecraft:pushable": {
+				"is_pushable": false
+			},
+			"minecraft:damage_sensor": {
+				"triggers": {
+					"cause": "all",
+					"deals_damage": "no"
+				}
+			},
+			"minecraft:inventory": {
+				"additional_slots_per_strength": 0,
+				"can_be_siphoned_from": true,
+				"container_type": "minecart_chest",
+				"inventory_size": 2,
+				"private": false,
+				"restrict_to_owner": false
+			}
+		},
+		"events": {
+			"minecraft:entity_spawned": {
+				"add": {
+					"component_groups": ["mqdt:box_normal"]
+				}
+			},
+			"mqdt:normal_box": {
+				"add": {
+					"component_groups": ["mqdt:box_normal"]
+				},
+				"remove": {
+					"component_groups": ["mqdt:box_shrunk"]
+				}
+			},
+			"mqdt:shrunk_box": {
+				"add": {
+					"component_groups": ["mqdt:box_shrunk"]
+				},
+				"remove": {
+					"component_groups": ["mqdt:box_normal"]
+				}
+			}
+		}
+	}
+}

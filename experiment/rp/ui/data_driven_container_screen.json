@@ -1,0 +1,97 @@
+{
+  "namespace": "data_driven_container",
+  "container_label": {
+    "modifications": [
+      {
+        "array_name": "bindings",
+        "operation": "insert_back",
+        "value": [
+          {
+            "binding_type": "collection_details",
+            "binding_collection_name": "container_items"
+          },
+          {
+            "binding_name": "#item_durability_total_amount",
+            "binding_name_override": "#mqdt_identity",
+            "binding_type": "collection",
+            "binding_collection_name": "container_items"
+          },
+          {
+            "binding_name": "#item_durability_current_amount",
+            "binding_name_override": "#mqdt_layout",
+            "binding_type": "collection",
+            "binding_collection_name": "container_items"
+          },
+          {
+            "binding_type": "view",
+            "source_property_name": "(not ((#mqdt_identity = 32747) and (#mqdt_layout = 1193)))",
+            "target_property_name": "#visible"
+          }
+        ]
+      }
+    ]
+  },
+  "item_grid": {
+    "modifications": [
+      {
+        "array_name": "bindings",
+        "operation": "insert_back",
+        "value": [
+          {
+            "binding_type": "collection_details",
+            "binding_collection_name": "container_items"
+          },
+          {
+            "binding_name": "#item_durability_total_amount",
+            "binding_name_override": "#mqdt_identity",
+            "binding_type": "collection",
+            "binding_collection_name": "container_items"
+          },
+          {
+            "binding_name": "#item_durability_current_amount",
+            "binding_name_override": "#mqdt_layout",
+            "binding_type": "collection",
+            "binding_collection_name": "container_items"
+          },
+          {
+            "binding_type": "view",
+            "source_property_name": "(not ((#mqdt_identity = 32747) and (#mqdt_layout = 1193)))",
+            "target_property_name": "#visible"
+          }
+        ]
+      }
+    ]
+  },
+  "panel_top_half": {
+    "modifications": [
+      {
+        "array_name": "controls",
+        "operation": "insert_back",
+        "value": [
+          {
+            "mqdt@mqdt_exp.marker_host": {}
+          }
+        ]
+      }
+    ]
+  },
+  "screen@common.inventory_screen_common": {
+    "$close_on_player_hurt|default": true,
+    "$use_custom_pocket_toast|default": false,
+    "close_on_player_hurt": "$close_on_player_hurt",
+    "use_custom_pocket_toast": "$use_custom_pocket_toast",
+    "variables": [
+      {
+        "requires": "$desktop_screen",
+        "$screen_content": "data_driven_container.desktop_panel",
+        "$screen_bg_content": "common.screen_background",
+        "$screen_background_alpha": 0.4
+      },
+      {
+        "requires": "$pocket_screen",
+        "$use_custom_pocket_toast": true,
+        "$screen_content": "mqdt_exp.pocket_root"
+      }
+    ]
+  }
+}

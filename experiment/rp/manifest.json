@@ -1,0 +1,17 @@
+{
+	"format_version": 2,
+	"header": {
+		"name": "MQDT block_entity 实验 RP",
+		"description": "验证 data_driven_container 界面路由",
+		"uuid": "3f2a1b40-1c11-4e01-9a01-000000000011",
+		"version": [1, 0, 0],
+		"min_engine_version": [1, 26, 50]
+	},
+	"modules": [
+		{
+			"type": "resources",
+			"uuid": "3f2a1b40-1c11-4e01-9a01-000000000012",
+			"version": [1, 0, 0]
+		}
+	]
+}

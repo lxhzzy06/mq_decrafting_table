@@ -1,12 +1,26 @@
 {
-	"name": "backup-respawn-point",
-	"version": "1.0.0",
-	"description": "",
+	"name": "mq_decrafting_table",
+	"version": "1.1.0",
+	"description": "Minecraft 基岩版附加包: 分解台, 支持将物品反向分解为合成材料",
 	"type": "module",
 	"author": "lxhzzy",
 	"license": "MIT",
+	"scripts": {
+		"gen": "cargo run --release --manifest-path mq_decrating_table-rs/Cargo.toml && node scripts/gen-index.mjs",
+		"gen:ui": "node experiment/build-ui.mjs --production",
+		"gen:index": "node scripts/gen-index.mjs",
+		"build": "gulp build",
+		"deploy": "gulp -d",
+		"watch": "gulp -w -d",
+		"clean": "gulp -c",
+		"check": "tsc --noEmit --strict --target es2020 --module esnext --moduleResolution bundler --skipLibCheck src/main.ts",
+		"test": "node --test \"test/**/*.test.mjs\"",
+		"test:pack": "node scripts/check-pack.mjs",
+		"test:rust": "cargo test --manifest-path mq_decrating_table-rs/Cargo.toml",
+		"verify": "npm run test:rust && npm run test && npm run test:pack"
+	},
 	"dependencies": {
-		"@minecraft/server": "^1.12.0",
+		"@minecraft/server": "^2.10.0",
 		"form-data": "^4.0.2"
 	},
 	"devDependencies": {

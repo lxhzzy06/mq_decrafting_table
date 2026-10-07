@@ -1,0 +1,6 @@
+{
+  "ui_defs": [
+    "ui/mqdt_screen.json",
+    "ui/mqdt_pocket.json"
+  ]
+}

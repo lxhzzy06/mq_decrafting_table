@@ -1,0 +1,11 @@
+{
+  "format_version": "1.26.20",
+  "minecraft:block": {
+    "description": { "identifier": "mqdt_exp:plain_box", "menu_category": { "category": "items" } },
+    "components": {
+      "minecraft:display_name": "无标记三格对照容器",
+      "minecraft:destructible_by_mining": { "seconds_to_destroy": 1 },
+      "minecraft:block_entity": { "container": { "slot_count": 3 } }
+    }
+  }
+}

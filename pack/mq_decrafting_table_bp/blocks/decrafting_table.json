@@ -1,5 +1,5 @@
 {
-	"format_version": "1.21.20",
+	"format_version": "1.26.20",
 	"minecraft:block": {
 		"description": {
 			"identifier": "mq_decrafting_table:table",
@@ -8,7 +8,7 @@
 			}
 		},
 		"components": {
-			"minecraft:crafting_table": { "crafting_tags": ["mq_decrafting_table"] },
+			"minecraft:loot": "loot_tables/mq_decrafting_table.json",
 			"minecraft:destructible_by_mining": {
 				"seconds_to_destroy": 1
 			},
@@ -16,7 +16,10 @@
 				"explosion_resistance": 3
 			},
 			"minecraft:map_color": "#8B4513",
-			"minecraft:display_name": "tile.mq_decrafting_table:table.name"
+			"minecraft:display_name": "tile.mq_decrafting_table:table.name",
+			"mqdt:container_lifecycle": {},
+			"minecraft:tick": { "interval_range": [4, 4], "looping": true },
+			"minecraft:block_entity": { "container": { "slot_count": 3 } }
 		}
 	}
 }

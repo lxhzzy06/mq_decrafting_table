@@ -1,0 +1,10 @@
+{
+	"format_version": "1.21.10",
+	"minecraft:recipe_shaped": {
+		"description": { "identifier": "minecraft:test_route_cheap" },
+		"tags": ["crafting_table"],
+		"pattern": ["#"],
+		"key": { "#": { "item": "minecraft:test_dirt" } },
+		"result": { "item": "minecraft:test_block" }
+	}
+}

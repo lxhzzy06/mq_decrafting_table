@@ -1,0 +1,13 @@
+{
+  "format_version": "1.26.20",
+  "minecraft:block": {
+    "description": { "identifier": "mqdt_exp:be_marker_box", "menu_category": { "category": "items" } },
+    "components": {
+      "minecraft:display_name": "MQDT 隐藏标记实验",
+      "minecraft:destructible_by_mining": { "seconds_to_destroy": 1 },
+      "minecraft:tick": { "interval_range": [4, 4], "looping": true },
+      "mqdt_exp:marker": {},
+      "minecraft:block_entity": { "container": { "slot_count": 3 } }
+    }
+  }
+}

@@ -1,0 +1,17 @@
+{
+	"format_version": "1.26.1",
+	"minecraft:client_entity": {
+		"description": {
+			"identifier": "mqdt:decrafting_container",
+			"materials": {
+				"default": "entity_alphatest"
+			},
+			"textures": {
+				"default": "textures/blocks/decrafting_table_top"
+			},
+			"geometry": {
+				"default": "geometry.mqdt.container"
+			}
+		}
+	}
+}

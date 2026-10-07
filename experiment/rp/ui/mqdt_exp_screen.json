@@ -1,0 +1,320 @@
+{
+  "namespace": "mqdt_exp",
+  "slot_cell": {
+    "type": "panel",
+    "size": [
+      "100%",
+      "100%"
+    ],
+    "controls": [
+      {
+        "item@common.container_item": {
+          "$item_collection_name": "container_items"
+        }
+      }
+    ]
+  },
+  "pocket_slot_cell": {
+    "type": "panel",
+    "size": [
+      "100%",
+      "100%"
+    ],
+    "controls": [
+      {
+        "item@common.pocket_ui_container_item": {
+          "$item_collection_name": "container_items"
+        }
+      }
+    ]
+  },
+  "input_host": {
+    "type": "stack_panel",
+    "orientation": "vertical",
+    "collection_name": "container_items",
+    "size": [
+      18,
+      18
+    ],
+    "controls": [
+      {
+        "cell@mqdt_exp.slot_cell": {
+          "collection_index": 1
+        }
+      }
+    ]
+  },
+  "output_host": {
+    "type": "stack_panel",
+    "orientation": "vertical",
+    "collection_name": "container_items",
+    "size": [
+      18,
+      18
+    ],
+    "controls": [
+      {
+        "cell@mqdt_exp.slot_cell": {
+          "collection_index": 2
+        }
+      }
+    ]
+  },
+  "pocket_input_host": {
+    "type": "stack_panel",
+    "orientation": "vertical",
+    "collection_name": "container_items",
+    "size": [
+      26,
+      26
+    ],
+    "controls": [
+      {
+        "cell@mqdt_exp.pocket_slot_cell": {
+          "collection_index": 1
+        }
+      }
+    ]
+  },
+  "pocket_output_host": {
+    "type": "stack_panel",
+    "orientation": "vertical",
+    "collection_name": "container_items",
+    "size": [
+      26,
+      26
+    ],
+    "controls": [
+      {
+        "cell@mqdt_exp.pocket_slot_cell": {
+          "collection_index": 2
+        }
+      }
+    ]
+  },
+  "marker_host": {
+    "type": "stack_panel",
+    "orientation": "vertical",
+    "size": [
+      "100%",
+      "100%"
+    ],
+    "collection_name": "container_items",
+    "controls": [
+      {
+        "gate@mqdt_exp.marker_gate": {
+          "collection_index": 0
+        }
+      }
+    ]
+  },
+  "marker_gate": {
+    "type": "panel",
+    "size": [
+      "100%",
+      "100%"
+    ],
+    "bindings": [
+      {
+        "binding_type": "collection_details",
+        "binding_collection_name": "container_items"
+      },
+      {
+        "binding_name": "#item_durability_total_amount",
+        "binding_name_override": "#mqdt_identity",
+        "binding_type": "collection",
+        "binding_collection_name": "container_items"
+      },
+      {
+        "binding_name": "#item_durability_current_amount",
+        "binding_name_override": "#mqdt_layout",
+        "binding_type": "collection",
+        "binding_collection_name": "container_items"
+      },
+      {
+        "binding_type": "view",
+        "source_property_name": "((#mqdt_identity = 32747) and (#mqdt_layout = 1193))",
+        "target_property_name": "#visible"
+      }
+    ],
+    "controls": [
+      {
+        "title": {
+          "type": "label",
+          "text": "MQDT MARKER OK",
+          "localize": false,
+          "size": [
+            "90%",
+            10
+          ],
+          "color": [
+            0.05,
+            0.5,
+            0.05
+          ],
+          "anchor_from": "top_middle",
+          "anchor_to": "top_middle",
+          "offset": [
+            0,
+            0
+          ],
+          "layer": 2
+        }
+      },
+      {
+        "input@mqdt_exp.input_host": {
+          "anchor_from": "top_middle",
+          "anchor_to": "top_middle",
+          "offset": [
+            -28,
+            20
+          ]
+        }
+      },
+      {
+        "output@mqdt_exp.output_host": {
+          "anchor_from": "top_middle",
+          "anchor_to": "top_middle",
+          "offset": [
+            28,
+            20
+          ]
+        }
+      },
+      {
+        "arrow": {
+          "type": "image",
+          "texture": "textures/ui/arrow",
+          "size": [
+            22,
+            15
+          ],
+          "anchor_from": "top_middle",
+          "anchor_to": "top_middle",
+          "offset": [
+            0,
+            22
+          ],
+          "layer": 2
+        }
+      }
+    ]
+  },
+  "pocket_root": {
+    "type": "panel",
+    "size": [
+      "100%",
+      "100%"
+    ],
+    "controls": [
+      {
+        "vanilla@mqdt_exp.pocket_vanilla_host": {}
+      },
+      {
+        "mqdt@mqdt_exp.pocket_marker_host": {}
+      }
+    ]
+  },
+  "pocket_vanilla_host": {
+    "type": "stack_panel",
+    "orientation": "vertical",
+    "size": [
+      "100%",
+      "100%"
+    ],
+    "collection_name": "container_items",
+    "controls": [
+      {
+        "gate@mqdt_exp.pocket_vanilla_gate": {
+          "collection_index": 0
+        }
+      }
+    ]
+  },
+  "pocket_vanilla_gate": {
+    "type": "panel",
+    "size": [
+      "100%",
+      "100%"
+    ],
+    "bindings": [
+      {
+        "binding_type": "collection_details",
+        "binding_collection_name": "container_items"
+      },
+      {
+        "binding_name": "#item_durability_total_amount",
+        "binding_name_override": "#mqdt_identity",
+        "binding_type": "collection",
+        "binding_collection_name": "container_items"
+      },
+      {
+        "binding_name": "#item_durability_current_amount",
+        "binding_name_override": "#mqdt_layout",
+        "binding_type": "collection",
+        "binding_collection_name": "container_items"
+      },
+      {
+        "binding_type": "view",
+        "source_property_name": "(not ((#mqdt_identity = 32747) and (#mqdt_layout = 1193)))",
+        "target_property_name": "#visible"
+      }
+    ],
+    "controls": [
+      {
+        "vanilla@pocket_containers.data_driven_container_panel": {}
+      }
+    ]
+  },
+  "pocket_marker_host": {
+    "type": "stack_panel",
+    "orientation": "vertical",
+    "size": [
+      "100%",
+      "100%"
+    ],
+    "collection_name": "container_items",
+    "controls": [
+      {
+        "gate@mqdt_exp.pocket_marker_gate": {
+          "collection_index": 0
+        }
+      }
+    ]
+  },
+  "pocket_marker_gate": {
+    "type": "panel",
+    "size": [
+      "100%",
+      "100%"
+    ],
+    "bindings": [
+      {
+        "binding_type": "collection_details",
+        "binding_collection_name": "container_items"
+      },
+      {
+        "binding_name": "#item_durability_total_amount",
+        "binding_name_override": "#mqdt_identity",
+        "binding_type": "collection",
+        "binding_collection_name": "container_items"
+      },
+      {
+        "binding_name": "#item_durability_current_amount",
+        "binding_name_override": "#mqdt_layout",
+        "binding_type": "collection",
+        "binding_collection_name": "container_items"
+      },
+      {
+        "binding_type": "view",
+        "source_property_name": "((#mqdt_identity = 32747) and (#mqdt_layout = 1193))",
+        "target_property_name": "#visible"
+      }
+    ],
+    "controls": [
+      {
+        "mqdt@pocket_containers.mqdt_marker_panel": {}
+      }
+    ]
+  }
+}

@@ -1,0 +1,11 @@
+{
+	"format_version": "1.21.10",
+	"minecraft:recipe_shaped": {
+		"description": { "identifier": "minecraft:test_pillar_with_priority" },
+		"tags": ["crafting_table"],
+		"priority": -1,
+		"pattern": ["#", "#"],
+		"key": { "#": { "item": "minecraft:test_slab" } },
+		"result": { "item": "minecraft:test_pillar", "count": 2 }
+	}
+}

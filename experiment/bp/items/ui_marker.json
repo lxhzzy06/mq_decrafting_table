@@ -1,0 +1,15 @@
+{
+  "format_version": "1.26.10",
+  "minecraft:item": {
+    "description": {
+      "identifier": "mqdt_exp:ui_marker",
+      "menu_category": { "category": "none", "is_hidden_in_commands": true }
+    },
+    "components": {
+      "minecraft:max_stack_size": 1,
+      "minecraft:durability": { "max_durability": 32747 },
+      "minecraft:icon": "mqdt_exp_marker",
+      "minecraft:display_name": { "value": "MQDT UI 标记（自动回收）" }
+    }
+  }
+}

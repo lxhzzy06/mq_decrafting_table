@@ -1,0 +1,12 @@
+{
+	"format_version": "1.21.10",
+	"minecraft:recipe_shapeless": {
+		"description": { "identifier": "minecraft:test_stew_red" },
+		"tags": ["crafting_table"],
+		"ingredients": [
+			{ "item": "minecraft:test_red_mushroom" },
+			{ "tag": "minecraft:coals" }
+		],
+		"result": { "item": "minecraft:test_stew", "data": 1 }
+	}
+}

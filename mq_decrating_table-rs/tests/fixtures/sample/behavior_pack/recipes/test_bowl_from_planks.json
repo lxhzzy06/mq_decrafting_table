@@ -1,0 +1,10 @@
+{
+	"format_version": "1.21.10",
+	"minecraft:recipe_shaped": {
+		"description": { "identifier": "minecraft:test_bowl_from_planks" },
+		"tags": ["crafting_table"],
+		"pattern": ["AA", "A"],
+		"key": { "A": { "tag": "minecraft:planks" } },
+		"result": { "item": "minecraft:test_bowl", "count": 4 }
+	}
+}

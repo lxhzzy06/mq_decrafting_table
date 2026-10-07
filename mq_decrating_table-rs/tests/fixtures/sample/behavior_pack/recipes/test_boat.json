@@ -1,0 +1,21 @@
+{
+	"format_version": "1.20.10",
+	"minecraft:recipe_shaped": {
+		"description": {
+			"identifier": "minecraft:test_boat"
+		},
+		"tags": ["crafting_table"],
+		"pattern": ["# #", "###"],
+		"key": {
+			"#": {
+				"item": "minecraft:test_planks"
+			}
+		},
+		"unlock": {
+			"context": "AlwaysUnlocked"
+		},
+		"result": {
+			"item": "minecraft:test_boat"
+		}
+	}
+}

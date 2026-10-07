@@ -1,0 +1,10 @@
+{
+	"format_version": "1.21.10",
+	"minecraft:recipe_shaped": {
+		"description": { "identifier": "minecraft:test_route_expensive" },
+		"tags": ["crafting_table"],
+		"pattern": ["##", "##"],
+		"key": { "#": { "item": "minecraft:test_stone" } },
+		"result": { "item": "minecraft:test_block" }
+	}
+}

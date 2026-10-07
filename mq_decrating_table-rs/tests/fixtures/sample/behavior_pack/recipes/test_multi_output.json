@@ -1,0 +1,13 @@
+{
+	"format_version": "1.21.10",
+	"minecraft:recipe_shaped": {
+		"description": { "identifier": "minecraft:test_multi_output" },
+		"tags": ["crafting_table"],
+		"pattern": ["##"],
+		"key": { "#": { "item": "minecraft:test_log" } },
+		"result": [
+			{ "item": "minecraft:test_planks", "count": 4 },
+			{ "item": "minecraft:test_stick", "count": 2 }
+		]
+	}
+}

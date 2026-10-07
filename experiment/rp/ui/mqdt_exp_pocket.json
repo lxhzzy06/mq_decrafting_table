@@ -1,0 +1,111 @@
+{
+  "namespace": "pocket_containers",
+  "mqdt_marker_panel": {
+    "type": "panel",
+    "$container_title": "MQDT MARKER OK",
+    "$localize_title": false,
+    "controls": [
+      {
+        "helpers@common.container_gamepad_helpers": {
+          "layer": 3
+        }
+      },
+      {
+        "header@pocket_containers.header_area": {
+          "layer": 2
+        }
+      },
+      {
+        "bg@pocket_containers.background_panel": {
+          "layer": 0
+        }
+      },
+      {
+        "inventory@pocket_containers.half_screen": {
+          "$container_size": 36,
+          "$pane_collection": "combined_hotbar_and_inventory_items"
+        }
+      },
+      {
+        "container@pocket_containers.mqdt_marker_half": {}
+      },
+      {
+        "details@common.selected_item_details_factory": {}
+      },
+      {
+        "lock_notice@common.item_lock_notification_factory": {
+          "$offset": [
+            0,
+            "85%"
+          ]
+        }
+      },
+      {
+        "cursor@common.gamepad_cursor_button": {}
+      },
+      {
+        "selected@common.inventory_selected_icon_button": {}
+      },
+      {
+        "hold@common.inventory_take_progress_icon_button": {}
+      },
+      {
+        "flying@common.flying_item_renderer": {
+          "layer": 12
+        }
+      }
+    ]
+  },
+  "mqdt_marker_half": {
+    "type": "panel",
+    "size": [
+      "50%",
+      "100%-27px"
+    ],
+    "offset": [
+      0,
+      27
+    ],
+    "anchor_from": "top_right",
+    "anchor_to": "top_right",
+    "controls": [
+      {
+        "input@mqdt_exp.pocket_input_host": {
+          "anchor_from": "top_middle",
+          "anchor_to": "top_middle",
+          "offset": [
+            -40,
+            32
+          ]
+        }
+      },
+      {
+        "output@mqdt_exp.pocket_output_host": {
+          "anchor_from": "top_middle",
+          "anchor_to": "top_middle",
+          "offset": [
+            40,
+            32
+          ]
+        }
+      },
+      {
+        "arrow": {
+          "type": "image",
+          "texture": "textures/ui/arrow",
+          "size": [
+            22,
+            15
+          ],
+          "anchor_from": "top_middle",
+          "anchor_to": "top_middle",
+          "offset": [
+            0,
+            38
+          ],
+          "layer": 2
+        }
+      }
+    ]
+  }
+}

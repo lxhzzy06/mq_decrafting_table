@@ -1,12 +1,10 @@
 use crate::loot_table::LootTable;
-use anyhow::{bail, Result};
+use anyhow::Result;
 use rustc_hash::FxHashMap;
 use serde::{ser::SerializeStruct, Deserialize, Serialize, Serializer};
 use serde_json::Value;
 use std::{borrow::Cow, char};
 
-const CHARS: [char; 9] = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I'];
-const BUCKET: &'static str = "minecraft:bucket";
 
 impl<'a> From<ItemStack<'a>> for ItemPair<'a> {
     #[inline(always)]
@@ -25,7 +23,8 @@ pub struct ItemPair<'a> {
     pub data: Option<u8>,
 }
 
-#[derive(Serialize, Deserialize)]
+/// `Copy` 是为了能在不消费 `Shaped` 的前提下结算材料清单(`inverse_results`)
+#[derive(Serialize, Deserialize, Clone, Copy)]
 #[serde(untagged)]
 pub enum Key<'a> {
     #[serde(borrow)]
@@ -33,12 +32,6 @@ pub enum Key<'a> {
     Tag(ItemTag<'a>),
 }
 
-impl<'a> Key<'a> {
-    #[inline(always)]
-    fn take_item(self) -> ItemPair<'a> {
-        unsafe { (&self as *const Key as *const ItemPair).read() }
-    }
-}
 
 #[derive(Serialize, Deserialize, Clone, Copy)]
 pub struct ItemStack<'a> {
@@ -62,15 +55,6 @@ impl<'a> std::fmt::Display for ItemStack<'a> {
     }
 }
 
-impl<'a> ItemStack<'a> {
-    const fn crate_mq(&self, id: &'a str) -> ItemStack<'a> {
-        Self {
-            item: id,
-            data: self.data,
-            count: self.count,
-        }
-    }
-}
 
 impl<'a> From<&'a str> for ItemStack<'a> {
     #[inline(always)]
@@ -97,12 +81,6 @@ pub enum Ingredient<'a> {
     Tag(ItemTag<'a>),
 }
 
-impl<'a> Ingredient<'a> {
-    #[inline(always)]
-    fn take_item(self) -> ItemStack<'a> {
-        unsafe { (&self as *const Ingredient as *const ItemStack).read() }
-    }
-}
 
 impl<'a> From<ItemStack<'a>> for Vec<Ingredient<'a>> {
     #[inline(always)]
@@ -155,6 +133,7 @@ impl<'a> ItemStacks<'a> {
             ItemStacks::Multiple(is) => unsafe { is.get_unchecked(0) },
         }
     }
+
 }
 
 #[derive(Deserialize, Serialize)]
@@ -179,136 +158,16 @@ pub struct Shaped<'a> {
     pub result: ItemStacks<'a>,
 }
 
-#[inline(always)]
-fn push_char(pattern: &mut Vec<String>, i: u8, ch: char, item: &ItemStack) -> Result<()> {
-    unsafe {
-        pattern.get_unchecked_mut(match i {
-            0..=2 => 0,
-            3..=5 => 1,
-            6..=8 => 2,
-            _ => bail!("物品 {item} 数量过多"),
-        })
-    }
-    .push(ch);
-    Ok(())
-}
-
-impl<'a> Shaped<'a> {
-    #[inline(always)]
-    fn create_pattern(item: ItemStack<'a>) -> Result<Vec<Cow<'a, str>>> {
-        let mut pattern = vec!["".to_owned(); 3];
-        for i in 0..item.count.unwrap_or(1) {
-            push_char(&mut pattern, i, '#', &item)?;
-        }
-        Ok(pattern.into_iter().map(Cow::from).collect())
-    }
-
-    #[inline]
-    fn inverse(self) -> Result<Shaped<'a>> {
-        let mut vecs: Vec<ItemStack> = vec![];
-        let mut results: Vec<ItemStack> = self
-            .key
-            .into_iter()
-            .map(|(k, i)| {
-                let pair = i.take_item();
-                let count = self
-                    .pattern
-                    .iter()
-                    .map(|s| s.chars().filter(|&c| c == k).count())
-                    .sum::<usize>() as u8;
-                match pair.item {
-                    "minecraft:bucket" if count > 1 => {
-                        for _ in 1..count {
-                            vecs.push(ItemStack {
-                                item: BUCKET,
-                                data: pair.data,
-                                count: None,
-                            })
-                        }
-                        ItemStack {
-                            count: None,
-                            data: pair.data,
-                            item: pair.item,
-                        }
-                    }
-                    _ => ItemStack {
-                        count: Some(count),
-                        data: pair.data,
-                        item: pair.item,
-                    },
-                }
-            })
-            .collect();
-        results.extend(vecs.into_iter());
-        Ok(match self.result {
-            ItemStacks::Multiple(items) => {
-                let mut pattern: Vec<String> = vec!["".to_owned(); 3];
-                let mut key: FxHashMap<char, Key> = FxHashMap::default();
-                for (mut i, item) in items.into_iter().enumerate() {
-                    let char = unsafe { CHARS.get_unchecked(i) };
-                    match item.item {
-                        "minecraft:bucket" if item.count.is_some() => {
-                            for c in 0..item.count.unwrap() {
-                                i += c as usize;
-                                push_char(&mut pattern, i as u8, *char, &item)?;
-                            }
-                        }
-                        _ => {
-                            push_char(&mut pattern, i as u8, *char, &item)?;
-                        }
-                    }
-                    key.insert(
-                        *char,
-                        Key::Item(ItemPair {
-                            item: item.item,
-                            data: item.data,
-                        }),
-                    );
-                }
-                Self {
-                    pattern: pattern.into_iter().map(Cow::from).collect(),
-                    key,
-                    result: ItemStacks::Multiple(results),
-                }
-            }
-            ItemStacks::Single(item) => Shaped {
-                key: FxHashMap::from_iter([('#', Key::Item(item.into()))]),
-                pattern: Shaped::create_pattern(item)?,
-                result: ItemStacks::Multiple(results),
-            },
-        })
-    }
-}
 
 #[derive(Serialize, Deserialize)]
 pub struct Shapeless<'a> {
     #[serde(borrow)]
     pub ingredients: Vec<Ingredient<'a>>,
-    pub result: ItemStack<'a>,
+    /// 官方 schema 允许 shapeless 的产物写成数组, 只是原版从未使用; 多于一种材料时必须用数组
+    #[serde(borrow)]
+    pub result: ItemStacks<'a>,
 }
 
-impl<'a> Shapeless<'a> {
-    #[inline]
-    fn inverse(self) -> Result<Shaped<'a>> {
-        Ok(Shaped {
-            key: FxHashMap::from_iter([('#', Key::Item(self.result.into()))]),
-            pattern: Shaped::create_pattern(self.result)?,
-            result: ItemStacks::Multiple(
-                self.ingredients
-                    .into_iter()
-                    .map(|i| i.take_item())
-                    .collect(),
-            ),
-        })
-    }
-
-    pub const fn return_item(ingredients: Vec<Ingredient<'a>>, result: ItemStack<'a>) -> Self {
-        Self {
-            ingredients,
-            result,
-        }
-    }
-}
 
 #[derive(Serialize, Deserialize)]
 #[serde(untagged)]
@@ -319,10 +178,6 @@ pub enum Data<'a> {
     Shapeless(Shapeless<'a>),
 }
 
-#[derive(Serialize, Deserialize)]
-pub struct Unlock<'a> {
-    context: &'a str,
-}
 
 #[derive(Serialize, Deserialize)]
 pub struct RecipeComponent<'a> {
@@ -405,119 +260,129 @@ impl<'a> From<RecipeComponent<'a>> for Recipe<'a> {
     }
 }
 
-#[inline(always)]
-fn mq_decrafting_item(id: &str) -> String {
-    if id.starts_with("minecraft:") {
-        id.replace("minecraft:", "mq_decrafting_item:")
-    } else {
-        "mq_decrafting_item:".to_owned() + id
+/// 中介物的物品 id。原版用 aux 区分变种 (`suspicious_stew@7` 与 `suspicious_stew@9` 是不同汤),
+/// 而中介物是新物品没有 aux, 所以把 aux 编进 id 尾巴, 否则同一基础名的多个变种会抢同一张战利品表。
+fn mq_decrafting_item(id: &str, data: Option<u8>) -> String {
+    let base = id.strip_prefix("minecraft:").unwrap_or(id);
+    match data {
+        Some(d) if d != 0 => format!("mq_decrafting_item:{base}_{d}"),
+        _ => format!("mq_decrafting_item:{base}"),
     }
 }
 
+/// 供选择路线使用的配方摘要
+pub struct Summary {
+    /// 正向配方的材料总数。反转成本最低的路线, 才能保证分解不会凭空造出物资。
+    pub cost: u32,
+    /// 其中来自 tag 的输入个数, 越少返还越确定。
+    pub tag_inputs: u32,
+    /// 原配方的产物清单(物品 id 带 aux, 数量)。容器模式拿它决定中介物 id 与"一批多少个"。
+    pub products: Vec<(String, u32)>,
+    /// 产物是哪几种物品。同一物品的多种配方只保留最省材料的那条, 所以签名里**不带**数量。
+    pub signature: String,
+}
+
 impl<'a> RecipeComponent<'a> {
-    #[inline(always)]
-    pub fn new(id: &'a str, data: Data<'a>) -> Self {
-        Self {
-            description: Cow::Borrowed(id).into(),
-            unlock: Some("AlwaysUnlocked".into()),
-            tags: vec!["mq_decrafting_table"],
-            data,
-            priority: None,
+    pub fn summary(&self) -> Summary {
+        // 签名里的物品必须带上 aux: 原版用 `banner@4`/`suspicious_stew@7` 这类写法表达不同物品,
+        // 去掉 aux 会把它们误判成同一个可分解物品而互相吞掉。
+        let mut out: Vec<(String, u32)> = Vec::new();
+        let mut push = |item: &str, data: Option<u8>, count: u32| {
+            out.push((
+                match data {
+                    Some(d) if d != 0 => format!("{item}@{d}"),
+                    _ => item.to_owned(),
+                },
+                count,
+            ))
+        };
+        let (cost, tag_inputs) = match &self.data {
+            Data::Shaped(s) => {
+                let mut cost = 0;
+                let mut tags = 0;
+                for line in &s.pattern {
+                    for ch in line.chars() {
+                        match s.key.get(&ch) {
+                            Some(Key::Item(_)) => cost += 1,
+                            Some(Key::Tag(_)) => {
+                                cost += 1;
+                                tags += 1;
+                            }
+                            None => {}
+                        }
+                    }
+                }
+                match &s.result {
+                    ItemStacks::Single(i) => push(i.item, i.data, i.count.unwrap_or(1) as u32),
+                    ItemStacks::Multiple(v) => {
+                        for i in v {
+                            push(i.item, i.data, i.count.unwrap_or(1) as u32)
+                        }
+                    }
+                }
+                (cost, tags)
+            }
+            Data::Shapeless(s) => {
+                let mut cost = 0;
+                let mut tags = 0;
+                for i in &s.ingredients {
+                    match i {
+                        Ingredient::Item(_) => cost += 1,
+                        Ingredient::Tag(_) => {
+                            cost += 1;
+                            tags += 1;
+                        }
+                    }
+                }
+                match &s.result {
+                    ItemStacks::Single(i) => push(i.item, i.data, i.count.unwrap_or(1) as u32),
+                    ItemStacks::Multiple(v) => {
+                        for i in v {
+                            push(i.item, i.data, i.count.unwrap_or(1) as u32)
+                        }
+                    }
+                }
+                (cost, tags)
+            }
+        };
+        out.sort_unstable();
+        Summary {
+            cost,
+            tag_inputs,
+            // 不带数量: 16 个一批和 8 个一批是同一种物品的两条路线, 必须在这里就合并掉,
+            // 否则两条都会进 winners, 最后靠中介物撞名随机留一条(按文件名, 不是按成本)
+            signature: out
+                .iter()
+                .map(|(i, _)| i.clone())
+                .collect::<Vec<_>>()
+                .join("+"),
+            products: out,
         }
     }
+
 
     #[inline(always)]
     pub fn is_deprecated(&self) -> bool {
         self.tags.contains(&"deprecated")
     }
 
+    /// 反转: 不产出配方, 只给出中介物 id 与它对应的战利品表。
+    ///
+    /// 分解已经不走合成台的配方匹配了 —— 容器实体直接把整批物品换成中介物,
+    /// 背包侧再按数量逐个掷战利品表还原材料。于是 9 格上限、shapeless 的 count 按格计、
+    /// 缩批撞形这些约束全部失效, 所有路线都能用同一套结构表达, 不再需要分情况讨论。
     #[inline]
-    pub fn inverse(
-        mut self,
-        result_recipe_id: &'a str,
-        result_item_id: &'a mut String,
-    ) -> anyhow::Result<(Option<Recipe<'a>>, Option<LootTable<'a>>)> {
-        self.description.identifier = Cow::Owned(result_recipe_id.to_owned());
-        self.tags = vec!["mq_decrafting_table"];
-        self.unlock = Some("AlwaysUnlocked".into());
-        Ok(match self.data {
+    pub fn inverse(self) -> anyhow::Result<(String, LootTable<'a>)> {
+        let (first, table) = match self.data {
             Data::Shaped(shaped) => {
-                if match &shaped.result {
-                    ItemStacks::Single(item) => item.count.unwrap_or(1) > 9,
-                    ItemStacks::Multiple(items) => {
-                        items.iter().map(|item| item.count.unwrap_or(1)).sum::<u8>() > 9
-                    }
-                } {
-                    println!("物品数量过多: {}", &shaped.result);
-                    return Ok((None, None));
-                }
-                if shaped.key.values().any(
-                    const {
-                        |v: &Key| {
-                            if let Key::Tag(_) = v {
-                                true
-                            } else {
-                                false
-                            }
-                        }
-                    },
-                ) {
-                    let itemstack: &ItemStack<'_> = shaped.result.take_item_or_first();
-                    result_item_id.push_str(&mq_decrafting_item(itemstack.item));
-                    (
-                        Some(
-                            RecipeComponent::new(
-                                result_recipe_id,
-                                Data::Shapeless(Shapeless::return_item(
-                                    shaped.result.clone().into(),
-                                    itemstack.crate_mq(result_item_id.as_str()),
-                                )),
-                            )
-                            .into(),
-                        ),
-                        Some(LootTable::from_shaped(shaped)?),
-                    )
-                } else {
-                    self.data = Data::Shaped(shaped.inverse()?);
-                    (Some(self.into()), None)
-                }
+                let item = *shaped.result.take_item_or_first();
+                (item, LootTable::from_shaped(shaped)?)
             }
             Data::Shapeless(shapeless) => {
-                if shapeless.result.count.unwrap_or(1) > 9 {
-                    return Ok((None, None));
-                }
-                if shapeless.ingredients.iter().any(
-                    const {
-                        |v: &Ingredient| {
-                            if let Ingredient::Tag(_) = v {
-                                true
-                            } else {
-                                false
-                            }
-                        }
-                    },
-                ) {
-                    result_item_id.push_str(&mq_decrafting_item(shapeless.result.item));
-                    (
-                        Some(
-                            RecipeComponent::new(
-                                result_recipe_id,
-                                Data::Shapeless(Shapeless::return_item(
-                                    shapeless.result.into(),
-                                    shapeless.result.crate_mq(result_item_id.as_str()),
-                                )),
-                            )
-                            .into(),
-                        ),
-                        Some(LootTable::from_vec_ingredient(
-                            shapeless.ingredients.clone(),
-                        )?),
-                    )
-                } else {
-                    self.data = Data::Shaped(shapeless.inverse()?);
-                    (Some(self.into()), None)
-                }
+                let item = *shapeless.result.take_item_or_first();
+                (item, LootTable::from_vec_ingredient(shapeless.ingredients)?)
             }
-        })
+        };
+        Ok((mq_decrafting_item(first.item, first.data), table))
     }
 }

@@ -1,0 +1,23 @@
+{
+	"format_version": "1.20.10",
+	"minecraft:recipe_shapeless": {
+		"description": {
+			"identifier": "minecraft:test_shapeless"
+		},
+		"tags": ["crafting_table"],
+		"ingredients": [
+			{
+				"item": "minecraft:test_dust"
+			},
+			{
+				"tag": "minecraft:coals"
+			}
+		],
+		"unlock": {
+			"context": "AlwaysUnlocked"
+		},
+		"result": {
+			"item": "minecraft:test_shapeless"
+		}
+	}
+}

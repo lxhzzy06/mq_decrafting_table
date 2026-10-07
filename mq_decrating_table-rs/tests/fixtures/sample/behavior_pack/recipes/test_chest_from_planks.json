@@ -1,0 +1,10 @@
+{
+	"format_version": "1.21.10",
+	"minecraft:recipe_shaped": {
+		"description": { "identifier": "minecraft:test_chest_from_planks" },
+		"tags": ["crafting_table"],
+		"pattern": ["###", "# #", "###"],
+		"key": { "#": { "item": "minecraft:test_planks" } },
+		"result": { "item": "minecraft:test_chest" }
+	}
+}

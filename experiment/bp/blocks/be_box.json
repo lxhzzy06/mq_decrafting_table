@@ -1,0 +1,27 @@
+{
+	"format_version": "1.26.20",
+	"minecraft:block": {
+		"description": {
+			"identifier": "mqdt_exp:be_box",
+			"menu_category": {
+				"category": "items"
+			}
+		},
+		"components": {
+			"minecraft:destructible_by_mining": {
+				"seconds_to_destroy": 1
+			},
+			"minecraft:display_name": "block_entity 实验方块",
+			"minecraft:tick": {
+				"interval_range": [20, 20],
+				"looping": true
+			},
+			"mqdt_exp:probe": {},
+			"minecraft:block_entity": {
+				"container": {
+					"slot_count": 2
+				}
+			}
+		}
+	}
+}

@@ -1,0 +1,27 @@
+{
+	"format_version": "1.20.10",
+	"minecraft:recipe_shaped": {
+		"description": {
+			"identifier": "minecraft:test_batch16"
+		},
+		"tags": [ "crafting_table" ],
+		"pattern": [
+			"###",
+			"###"
+		],
+		"key": {
+			"#": {
+				"item": "minecraft:test_batch_source"
+			}
+		},
+		"unlock": [
+			{
+				"item": "minecraft:test_batch_source"
+			}
+		],
+		"result": {
+			"item": "minecraft:test_pane",
+			"count": 16
+		}
+	}
+}

@@ -1,40 +1,73 @@
 name: Release
 
 on:
-  workflow_dispatch:
   schedule:
     - cron: '0 18 * * *'
+  workflow_dispatch:
+    inputs:
+      upstream_tag:
+        description: '固定官方配方标签（留空按自动发现）'
+        type: string
+        default: ''
+      release_tag:
+        description: '附加包新版本标签（如 v1.1.0；须同时指定官方标签）'
+        type: string
+        default: ''
+
+# 夜间任务与手动触发不能并发改同一个仓库(否则会重复建 release)
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+permissions:
+  contents: write
 
 jobs:
-  check:
-    name: Build
+  gate:
+    name: 发布前门禁
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
+
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
-          cache: 'npm'
+          node-version: 22
+          cache: npm
 
       - run: npm ci
 
-      - uses: actions-rs/toolchain@v1
+      - name: 类型检查
+        run: npm run check
+
+      - name: 脚本行为测试
+        run: npm test
+
+      - name: 数据包一致性校验
+        run: npm run test:pack
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - name: 生成器集成测试
+        run: npm run test:rust
+
+  build:
+    name: Build
+    needs: gate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
         with:
-          toolchain: stable
+          node-version: 22
+          cache: npm
 
-      # - name: Setup Debug Session
-      #   uses: csexton/debugger-action@master
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - run: npm ci
 
-      - run: node action.js
-        env:
-          GITHUB_TOKEN: ${{ secrets.CUSTOM_TOKEN }}
-          TOKEN123: ${{ secrets.TOKEN123 }}
-          CLIENT_ID: ${{ secrets.CLIENT_ID }}
-          CLIENT_SECRET: ${{ secrets.CLIENT_SECRET }}
+      - uses: dtolnay/rust-toolchain@stable
 
-      - name: Cache
+      # 缓存必须在构建之前恢复; key 带上源码, 否则改了生成器也命中旧缓存
+      - name: Cache Cargo
         uses: actions/cache@v4
         with:
           path: |
@@ -43,4 +76,18 @@ jobs:
             ~/.cargo/registry/cache/
             ~/.cargo/git/db/
             mq_decrating_table-rs/target/
-          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          key: ${{ runner.os }}-cargo-${{ hashFiles('mq_decrating_table-rs/Cargo.lock', 'mq_decrating_table-rs/src/**', 'mq_decrating_table-rs/Cargo.toml') }}
+
+      - run: node action.js
+        env:
+          GITHUB_TOKEN: ${{ secrets.CUSTOM_TOKEN }}
+          TOKEN123: ${{ secrets.TOKEN123 }}
+          CLIENT_ID: ${{ secrets.CLIENT_ID }}
+          CLIENT_SECRET: ${{ secrets.CLIENT_SECRET }}
+          # 之前漏传这个环境变量, publishToCurseForge 每次都直接跳过, 商店从未被自动更新过
+          CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
+          MQDT_UPSTREAM_TAG: ${{ inputs.upstream_tag }}
+          MQDT_RELEASE_TAG: ${{ inputs.release_tag }}
+
+      # - name: Setup Debug Session
+      #   uses: csexton/debugger-action@master

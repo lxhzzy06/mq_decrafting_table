@@ -1,0 +1,22 @@
+{
+	"format_version": "1.26.10",
+	"minecraft:block": {
+		"description": {
+			"identifier": "mqdt_exp:box",
+			"menu_category": {
+				"category": "items"
+			}
+		},
+		"components": {
+			"minecraft:destructible_by_mining": {
+				"seconds_to_destroy": 1
+			},
+			"minecraft:display_name": "实验方块",
+			"minecraft:tick": {
+				"interval_range": [20, 20],
+				"looping": true
+			},
+			"mqdt_exp:probe": {}
+		}
+	}
+}

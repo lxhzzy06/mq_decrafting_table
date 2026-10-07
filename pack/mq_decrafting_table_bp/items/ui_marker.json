@@ -1,0 +1,15 @@
+{
+  "format_version": "1.26.10",
+  "minecraft:item": {
+    "description": {
+      "identifier": "mqdt:ui_marker",
+      "menu_category": { "category": "none", "is_hidden_in_commands": true }
+    },
+    "components": {
+      "minecraft:max_stack_size": 1,
+      "minecraft:durability": { "max_durability": 32743 },
+      "minecraft:icon": "mq",
+      "minecraft:display_name": { "value": "MQDT UI marker" }
+    }
+  }
+}

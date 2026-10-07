@@ -1,0 +1,5 @@
+{
+  "resource_pack_name": "mqdt_exp",
+  "texture_name": "atlas.items",
+  "texture_data": { "mqdt_exp_marker": { "textures": "textures/items/stick" } }
+}

@@ -1,0 +1,73 @@
+name: Test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: 自动化测试
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: 类型检查
+        run: npm run check
+
+      - name: 脚本行为测试
+        run: npm test
+
+      - name: 数据包一致性校验(骨架)
+        run: npm run test:pack
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - name: 缓存 Cargo
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            mq_decrating_table-rs/target/
+          key: ${{ runner.os }}-cargo-test-${{ hashFiles('mq_decrating_table-rs/Cargo.lock', 'mq_decrating_table-rs/src/**', 'mq_decrating_table-rs/Cargo.toml') }}
+
+      - name: 生成器集成测试
+        run: npm run test:rust
+
+      # 生成产物本身是 gitignored 的, 上面几步只能校验骨架。
+      # 固定正式版语料，避免 CI 混入预览版配方。
+      - name: 拉取官方配方语料(仅 recipes, 稀疏签出)
+        run: |
+          git clone --depth 1 --branch v1.26.50.4 --filter=blob:none --sparse https://github.com/Mojang/bedrock-samples.git bedrock-samples
+          git -C bedrock-samples sparse-checkout set behavior_pack/recipes
+
+      - name: 用官方合成表生成产物
+        run: npm run gen
+
+      - name: 校验真实生成数据
+        run: npm run test:pack
+
+      - name: 产物数量不得倒退
+        run: |
+          count() { find "pack/mq_decrafting_table_bp/$1" -maxdepth 1 -name '*.json' | wc -l; }
+          recipes=$(count recipes/decrafting)
+          tables=$(count loot_tables/decrafting)
+          items=$(count items/decrafting)
+          echo "分解配方 $recipes / 战利品表 $tables / 中介物 $items"
+          test "$recipes" -eq 0 || { echo "原生容器不应生成旧反向配方"; exit 1; }
+          test "$items" -ge 800 || { echo "分解规则数量异常下跌(期望 >=800)"; exit 1; }
+          test "$tables" -eq "$items" || { echo "中介物与战利品表数量不一致"; exit 1; }
