@@ -82,7 +82,10 @@ for (const kind of ['damaged', 'enchanted']) test(`${kind} equipment is preserve
   hooks.onTick({ block });
   assert.equal(container.getItem(1), item);
   assert.equal(container.getItem(2).typeId, 'mq_decrafting_item:need');
-  assert.match(container.getItem(2).nameTag, /不可分解/);
+  assert.equal(container.getItem(2).nameTag, undefined);
+  assert.deepEqual(container.getItem(2).getRawLore(), [
+    { translate: 'mqdt.hint.protected' }, { translate: 'mqdt.hint.cannot_decraft' },
+  ]);
 });
 test('escaped marker is reclaimed in inventory and cursor without granting materials', async () => {
   const { S, container } = await table();

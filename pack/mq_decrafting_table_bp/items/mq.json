@@ -12,7 +12,7 @@
 			"minecraft:icon": "mq",
 			"minecraft:glint": true,
 			"minecraft:display_name": {
-				"value": "关注 §l§b吃毛不吐毛球§r 谢谢喵~"
+				"value": "mqdt.item.result.name"
 			}
 		}
 	}

@@ -301,9 +301,35 @@ if (itemTexture) {
 for (const side of ['mq_decrafting_table_bp', 'mq_decrafting_table_rp']) {
 	const textsDir = path.join(packDir, side, 'texts');
 	const languages = readJson(path.join(textsDir, 'languages.json'), `${side}/texts/languages.json`);
+	let referenceKeys;
 	for (const language of languages ?? []) {
-		if (!existsSync(path.join(textsDir, `${language}.lang`))) {
+		const filename = path.join(textsDir, `${language}.lang`);
+		if (!existsSync(filename)) {
 			fail(`${side} 缺少语言文件 texts/${language}.lang`);
+			continue;
+		}
+		const keys = new Set();
+		for (const line of readFileSync(filename, 'utf8').split(/\r?\n/)) {
+			if (!line.trim() || line.startsWith('##')) continue;
+			const separator = line.indexOf('=');
+			const key = line.slice(0, separator);
+			if (separator < 1 || !line.slice(separator + 1).trim()) fail(`${side}/${language} 包含无效或空翻译: ${line}`);
+			if (keys.has(key)) fail(`${side}/${language} 重复翻译键: ${key}`);
+			keys.add(key);
+		}
+		if (referenceKeys && JSON.stringify([...keys].sort()) !== JSON.stringify([...referenceKeys].sort())) {
+			fail(`${side}/${language} 的翻译键与其他语言不完整对应`);
+		}
+		referenceKeys ??= keys;
+		if (side.endsWith('_rp')) {
+			const sources = [readFileSync(path.join(root, 'src/main.ts'), 'utf8'), readFileSync(path.join(root, 'src/localization.ts'), 'utf8')];
+			const required = sources.flatMap(source => [...source.matchAll(/translate:\s*'(mqdt\.[^']+)'/g)].map(match => match[1]));
+			for (const { absolute } of collectJson(path.join(bpDir, 'items'))) {
+				const item = JSON.parse(readFileSync(absolute, 'utf8'));
+				const key = item['minecraft:item']?.components?.['minecraft:display_name']?.value;
+				if (typeof key === 'string' && key.startsWith('mqdt.')) required.push(key);
+			}
+			for (const key of new Set(required)) if (!keys.has(key)) fail(`${side}/${language} 缺少玩家可见翻译: ${key}`);
 		}
 	}
 }

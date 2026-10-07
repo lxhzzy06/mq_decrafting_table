@@ -64,7 +64,7 @@ test('战利品表缺失时保留物品并提示玩家', async () => {
 	putAndNotify(S, player, 0, S.createItem('mq_decrafting_item:nowhere', 2));
 
 	assert.equal(player.container.getItem(0)?.amount, 2, '没有战利品表时一个都不能少');
-	assert.ok(player.messages.some((message) => message.includes('无法分解物品')));
+	assert.ok(player.messages.some((message) => message.translate === 'mqdt.message.cannot_decraft'));
 });
 
 test('掷表为空时不吞物品', async () => {
@@ -76,7 +76,7 @@ test('掷表为空时不吞物品', async () => {
 
 	assert.equal(player.container.getItem(0)?.typeId, 'mq_decrafting_item:coal');
 	assert.equal(S.tableCalls('decrafting/coal'), 1);
-	assert.ok(player.messages.some((message) => message.includes('无法分解物品')));
+	assert.ok(player.messages.some((message) => message.translate === 'mqdt.message.cannot_decraft'));
 });
 
 test('中途掷表失败时只消耗成功的部分', async () => {
@@ -289,8 +289,12 @@ test('输入不够一批: 输出格出现占位物品, 数量正好是差额', a
 	assert.equal(output.typeId, 'mq_decrafting_item:need');
 	assert.equal(output.amount, 2, 'batch=3 放了 1 个, 差额该是 2');
 	assert.equal(output.lockMode, 'none', '刻意不上锁: slot 锁在实体容器里拦不住拖拽, 却会触发原版通知');
-	assert.match(output.nameTag, /还差 2 个/, 'nameTag 要写清差多少');
-	assert.match(output.nameTag, /每份需 3 个/, 'nameTag 要写清一整批要几个');
+	assert.equal(output.nameTag, undefined, '共享容器不能写死某个玩家的语言');
+	assert.deepEqual(output.getRawLore(), [
+		{ translate: 'mqdt.hint.missing', with: ['2'] },
+		{ translate: 'mqdt.hint.item', with: { rawtext: [{ translate: 'item.acacia_door.name' }] } },
+		{ translate: 'mqdt.hint.batch', with: ['3'] },
+	]);
 });
 
 test('输入补够一批: 占位被真正的中介物顶掉', async () => {

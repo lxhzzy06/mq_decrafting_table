@@ -13,6 +13,7 @@ import {
 } from '@minecraft/server';
 import { DECRAFT_INDEX, DecraftEntry } from './generated/decrafting-index';
 import { ensureUiMarker, isUiMarker, INPUT_SLOT, OUTPUT_SLOT, TABLE_TYPE } from './ui-marker';
+import { itemName, matchesHint, rejectedLore, shortfallLore } from './localization';
 
 declare module '@minecraft/server' {
 	interface Player {
@@ -72,7 +73,7 @@ Player.prototype.Decraft = function (item: ItemStack | undefined) {
 
 	const table = lootTableFor(item.typeId.slice(ITEM_PREFIX.length));
 	if (!table) {
-		this.sendMessage('无法分解物品: ' + item.typeId);
+		this.sendMessage({ translate: 'mqdt.message.cannot_decraft', with: { rawtext: [itemName(item)] } });
 		return item;
 	}
 
@@ -85,7 +86,7 @@ Player.prototype.Decraft = function (item: ItemStack | undefined) {
 	while (remaining > 0) {
 		const materials = world.getLootTableManager().generateLootFromTable(table);
 		if (!materials?.length) {
-			this.sendMessage('无法分解物品: ' + item.typeId);
+			this.sendMessage({ translate: 'mqdt.message.cannot_decraft', with: { rawtext: [itemName(item)] } });
 			// 写回未处理的部分, 且必然 >= 1
 			item.amount = remaining;
 			return item;
@@ -108,7 +109,7 @@ Player.prototype.Init = function () {
 			this.Token = system.runInterval(CursorFn.bind(this), 1);
 		} else {
 			this.setDynamicProperty('has_cursor', false);
-			this.sendMessage('无法获取光标组件, 将使用容器模式');
+			this.sendMessage({ translate: 'mqdt.message.cursor_unavailable' });
 		}
 	}
 	const container = inventoryOf(this);
@@ -239,17 +240,13 @@ function showShortfall(container: Container, input: ItemStack, entry: DecraftEnt
 	const missing = entry.batch - input.amount;
 	// 已产出的中介物不能被差额提示覆盖；满输出格也不应生成负数量提示。
 	if (missing <= 0 || (output && output.typeId !== NEED_ITEM)) return;
-	// 差额没变就别重写, 免得每 4 tick 都产生一次容器写入
-	if (output?.typeId === NEED_ITEM && output.amount === missing) return;
+	const lore = shortfallLore(input, missing, entry.batch);
+	// 同数量但不同物品、或旧版写死语言的提示也需要刷新。
+	if (output?.typeId === NEED_ITEM && matchesHint(output, missing, lore)) return;
 
 	const placeholder = new ItemStack(NEED_ITEM, missing);
-	placeholder.nameTag = `还差 ${missing} 个 ${displayNameOf(input)} (每份需 ${entry.batch} 个)`;
+	placeholder.setLore(lore);
 	container.setItem(outputSlot, placeholder);
-}
-
-/** 玩家看得懂的名字: 自定义名优先, 否则把命名空间剥掉当兜底 */
-function displayNameOf(item: ItemStack): string {
-	return item.nameTag || item.typeId.replace(/^[a-z_]+:/, '').replace(/_/g, ' ');
 }
 
 /**
@@ -276,10 +273,9 @@ function tickContainer(container: Container, inputSlot = INPUT_SLOT, outputSlot 
 	if ((input.getComponent('minecraft:durability')?.damage ?? 0) > 0
 		|| (input.getComponent('minecraft:enchantable')?.getEnchantments().length ?? 0) > 0) {
 		if (!output || output.typeId === NEED_ITEM) {
-			const message = '损坏或附魔装备不可分解';
-			if (output?.nameTag !== message) {
+			if (output?.typeId !== NEED_ITEM || !matchesHint(output, 1, rejectedLore)) {
 				const hint = new ItemStack(NEED_ITEM, 1);
-				hint.nameTag = message;
+				hint.setLore(rejectedLore);
 				container.setItem(outputSlot, hint);
 			}
 		}
@@ -301,7 +297,9 @@ function tickContainer(container: Container, inputSlot = INPUT_SLOT, outputSlot 
 	}
 
 	const kept = output?.typeId === intermediate ? output.amount : 0;
-	container.setItem(outputSlot, new ItemStack(intermediate, kept + batches));
+	const result = new ItemStack(intermediate, kept + batches);
+	result.setLore([{ translate: 'mqdt.result.collect' }]);
+	container.setItem(outputSlot, result);
 
 	// 扣掉已换算的部分。剩下要么 >= 1, 要么清空整格, 不会写出非法的 0
 	const leftover = input.amount - batches * entry.batch;
@@ -390,12 +388,12 @@ system.afterEvents.scriptEventReceive.subscribe(
 			case 'enable':
 				player.setDynamicProperty('has_cursor', true);
 				player.Init();
-				if (player.Cursor?.isValid) player.sendMessage('光标模式已启用');
+				if (player.Cursor?.isValid) player.sendMessage({ translate: 'mqdt.message.cursor_enabled' });
 				break;
 			case 'disable':
 				player.setDynamicProperty('has_cursor', false);
 				player.Init();
-				player.sendMessage('光标模式已禁用');
+				player.sendMessage({ translate: 'mqdt.message.cursor_disabled' });
 				break;
 		}
 	},

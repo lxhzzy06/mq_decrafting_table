@@ -118,11 +118,15 @@ export class ItemStack {
 		// 真实 ItemStack 上这两个是可写属性, 脚本用它们给差额占位物品附说明与锁
 		this.nameTag = undefined;
 		this.lockMode = 'none';
+		this.localizationKey = `item.${typeId.split(':')[1]}.name`;
+		this.lore = [];
 		this.components = new Map();
 		if (typeId === 'mqdt:ui_marker') this.components.set('minecraft:durability', { maxDurability: 32743, damage: 0 });
 	}
 
 	getComponent(id) { return this.components.get(id); }
+	setLore(lines = []) { this.lore = structuredClone(lines.map(line => typeof line === 'string' ? { text: line } : line)); }
+	getRawLore() { return structuredClone(this.lore); }
 
 	get amount() {
 		return this.#amount;

@@ -293,7 +293,8 @@ async function buildOne(version, results) {
   version.prerelease = resolvePrerelease({ upstreamPrerelease: version.upstreamPrerelease, record: upstreamVersionRecord(version.tag) });
   log(version.prerelease ? "预览版" : "正式版", version.tag);
   const releaseTag = version.releaseTag ?? version.tag;
-  const notesFile = releaseTag === 'v1.1.0' ? './docs/RELEASE_NOTES_1.1.0.md' : undefined;
+  const notesFile = /^v\d+\.\d+\.\d+$/.test(releaseTag)
+    ? `./docs/RELEASE_NOTES_${releaseTag.slice(1)}.md` : undefined;
   version.changelog = notesFile && existsSync(notesFile) ? readFileSync(notesFile, 'utf-8') : undefined;
   applyLang(releaseTag);
 
