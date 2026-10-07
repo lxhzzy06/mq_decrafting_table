@@ -47,6 +47,11 @@ npm run build
 手动发布在 GitHub Actions 的 **Release** 页面填写 `upstream_tag`（例如 `v1.26.50.4`）
 和 `release_tag`（例如 `v1.1.0`）。检查通过后依次生成 GitHub Release、上传 123 云盘，正式版再上传 CurseForge；各渠道失败会独立记录。
 
+123 云盘接口若返回 `200020`，表示账号缺少开发者权益包，需在其商品中心处理账号权益。
+处理后在 **Release** 页面填写已有 `release_tag`，勾选 `retry_123` 即可只重试云盘：
+直接使用 GitHub 已发布包并校验大小和摘要，不重建 GitHub Release，也不重复上传 CurseForge。
+CurseForge 接口接受上传后，公开下载状态还取决于平台审核。
+
 ## 实现与许可
 
 Rust 生成材料战利品表和中介物，TypeScript 处理库存与返还。原生容器通过隐藏物品的
