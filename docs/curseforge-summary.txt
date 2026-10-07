@@ -1,0 +1,1 @@
+Recover crafting materials from supported vanilla items with a dedicated two-slot decrafting table for Minecraft Bedrock.
