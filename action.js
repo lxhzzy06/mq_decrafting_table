@@ -15,6 +15,7 @@ import axios from "axios";
 import FormData from "form-data";
 import { matchGameVersion, versionCandidates } from "./scripts/cf-version.mjs";
 import { selectQueue, resolvePrerelease, TAG_RE, versionKey } from "./scripts/ci-versions.mjs";
+import { panData } from './scripts/pan-response.mjs';
 
 const OWNER = "lxhzzy06";
 const REPO = "mq_decrafting_table";
@@ -151,16 +152,18 @@ async function downloadAndGenerate(version) {
 
 async function uploadTo123(file, version) {
   log("上传到 123pan");
-  if (JSON.parse(await (await http.get("https://open-api.123pan.com/api/v1/user/info", headers)).readBody()).code === 401) {
+  const userInfo = JSON.parse(await (await http.get("https://open-api.123pan.com/api/v1/user/info", headers)).readBody());
+  if (userInfo.code === 401) {
     log("更新 token");
     const { key: publicKey, key_id } = (await octokit.rest.actions.getRepoPublicKey({ owner: OWNER, repo: REPO })).data;
-    const secretValue = (
+    const secretValue = panData((
       await http.postJson(
         "https://open-api.123pan.com/api/v1/access_token",
         { client_id: process.env.CLIENT_ID, client_secret: process.env.CLIENT_SECRET },
         { platform: "open_platform" }
       )
-    ).result.data.accessToken;
+    ).result, 'access_token').accessToken;
+    if (!secretValue) throw new Error('access_token: token missing');
     core.setSecret(secretValue);
 
     await sodium.ready;
@@ -178,10 +181,12 @@ async function uploadTo123(file, version) {
     });
     headers.authorization = `Bearer ${secretValue}`;
     log("更新 token 成功");
+  } else {
+    panData(userInfo, 'user/info');
   }
   log("Token 校验完毕");
 
-  const create = (
+  const create = panData((
     await http.postJson(
       "https://open-api.123pan.com/upload/v1/file/create",
       {
@@ -192,32 +197,34 @@ async function uploadTo123(file, version) {
       },
       headers
     )
-  ).result.data;
+  ).result, 'file/create');
 
-  if (create.reuse !== false) {
+  if (create.reuse === true) {
     log("秒传完毕");
     return;
   }
 
   log("上传文件...");
-  const presignedURL = (
+  if (!create.preuploadID) throw new Error('file/create: preuploadID missing');
+  const presignedURL = panData((
     await http.postJson(
       "https://open-api.123pan.com/upload/v1/file/get_upload_url",
       { preuploadID: create.preuploadID, sliceNo: 1 },
       headers
     )
-  ).result.data.presignedURL;
+  ).result, 'get_upload_url').presignedURL;
+  if (!presignedURL) throw new Error('get_upload_url: URL missing');
   await axios.put(presignedURL, file);
 
-  const complete = (
+  const complete = panData((
     await http.postJson("https://open-api.123pan.com/upload/v1/file/upload_complete", { preuploadID: create.preuploadID }, headers)
-  ).result.data;
+  ).result, 'upload_complete');
   if (!complete.async) return;
 
   for (let i = 0; i < 60; i++) {
-    const result = (
+    const result = panData((
       await http.postJson("https://open-api.123pan.com/upload/v1/file/upload_async_result", { preuploadID: create.preuploadID }, headers)
-    ).result.data;
+    ).result, 'upload_async_result');
     // 只打状态, 响应里的 fileId/URL 属于可访问资源标识, 不进公开日志
     log("123pan 合并中...", result.completed === true ? "done" : "pending");
     if (result.completed === true) return;
@@ -342,6 +349,26 @@ async function buildOne(version, results) {
 }
 
 const results = { ok: [], notes: [] };
+// Retry a failed mirror using the exact already-published bytes. Other channels
+// are left alone, so recovery cannot create duplicate releases or store files.
+if (process.env.MQDT_RETRY_123 === 'true') {
+  const tag = process.env.MQDT_RELEASE_TAG;
+  if (!/^v\d+\.\d+\.\d+$/.test(tag ?? '')) throw new Error('云盘重试须指定附加包版本标签');
+  try {
+    const release = (await octokit.rest.repos.getReleaseByTag({ owner: OWNER, repo: REPO, tag })).data;
+    const asset = release.assets.find(a => a.name === `mq_decrafting_table-${tag}.mcaddon` && a.state === 'uploaded');
+    if (!asset || release.draft) throw new Error('已公开的正式包不存在');
+    const file = await (await http.get(asset.browser_download_url)).readBodyBuffer();
+    if (file.length !== asset.size) throw new Error('下载的发布包大小不符');
+    if (asset.digest && asset.digest !== `sha256:${crypto.createHash('sha256').update(file).digest('hex')}`) throw new Error('下载的发布包校验不符');
+    await uploadTo123(file, { releaseTag: tag });
+    log(`123pan ${tag} 上传完成，使用 GitHub 已发布的原始包`);
+    exit(0);
+  } catch (e) {
+    core.setFailed(redact(e.message));
+    exit(1);
+  }
+}
 const { queue, total, deferred } = await discover();
 log(`待发布版本共 ${total} 个, 本轮处理 ${queue.length} 个:`, queue.map((v) => v.tag).join(", ") || "(无)");
 if (deferred) log(`还有 ${deferred} 个在窗口内但超出单次上限, 留给后续运行`);
